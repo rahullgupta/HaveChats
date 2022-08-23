@@ -1,13 +1,33 @@
 import React from 'react';
-import { Drawer, Button, Divider } from 'rsuite';
+import { Drawer, Button, Divider, useToaster, Message } from 'rsuite';
 import { useProfile } from '../../context/profile.context';
+import { database } from '../../misc/firebase';
 import EditableInput from '../EditableInput';
 
 function Dashboard({ onSignOut }) {
   const { profile } = useProfile();
 
+  const toaster = useToaster();
+
   const onSave = async newData => {
-    console.log(newData);
+    const userNicknameRef = database.ref(`/profiles/${profile.uid}`).child('name');
+    try {
+      await userNicknameRef.set(newData);
+      const message = (
+        <Message showIcon type="success">
+          Nickname has been updated
+        </Message>
+      );
+      toaster.push(message);
+    }
+    catch(err){
+      const message = (
+        <Message showIcon type="error">
+          {err.message}
+        </Message>
+      );
+      toaster.push(message);
+    }
   };
 
   return (
