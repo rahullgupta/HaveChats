@@ -34,7 +34,7 @@ function SignIn() {
       toaster.push(message);
     } catch (err) {
       const message = (
-        <Message showIcon type="info">
+        <Message showIcon type="error">
           {err.message}
         </Message>
       );
