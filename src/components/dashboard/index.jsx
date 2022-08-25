@@ -3,6 +3,7 @@ import { Drawer, Button, Divider, useToaster, Message } from 'rsuite';
 import { useProfile } from '../../context/profile.context';
 import { database } from '../../misc/firebase';
 import EditableInput from '../EditableInput';
+import AvatarUploadBtn from './AvatarUploadBtn';
 import ProviderBlock from './ProviderBlock';
 
 function Dashboard({ onSignOut }) {
@@ -11,7 +12,9 @@ function Dashboard({ onSignOut }) {
   const toaster = useToaster();
 
   const onSave = async newData => {
-    const userNicknameRef = database.ref(`/profiles/${profile.uid}`).child('name');
+    const userNicknameRef = database
+      .ref(`/profiles/${profile.uid}`)
+      .child('name');
     try {
       await userNicknameRef.set(newData);
       const message = (
@@ -20,8 +23,7 @@ function Dashboard({ onSignOut }) {
         </Message>
       );
       toaster.push(message);
-    }
-    catch(err){
+    } catch (err) {
       const message = (
         <Message showIcon type="error">
           {err.message}
@@ -51,6 +53,7 @@ function Dashboard({ onSignOut }) {
           onSave={onSave}
           label={<h6 className="mb-2">Nickname</h6>}
         />
+        <AvatarUploadBtn />
       </Drawer.Body>
     </>
   );
