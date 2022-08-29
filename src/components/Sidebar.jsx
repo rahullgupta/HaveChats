@@ -6,11 +6,11 @@ import ChatRoomList from './rooms/ChatRoomList';
 
 function Sidebar() {
   const topSidebarRef = useRef();
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState(150);
 
   useEffect(() => {
     if (topSidebarRef.current) {
-      setHeight(topSidebarRef.current.scrollHeight);
+      setHeight(topSidebarRef.current.scrollHeight + 150);
     }
   }, [topSidebarRef]);
 
