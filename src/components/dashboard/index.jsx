@@ -5,6 +5,7 @@ import { database } from '../../misc/firebase';
 import EditableInput from '../EditableInput';
 import AvatarUploadBtn from './AvatarUploadBtn';
 import ProviderBlock from './ProviderBlock';
+import { getUserUpdates } from '../../misc/helpers';
 
 function Dashboard({ onSignOut }) {
   const { profile } = useProfile();
@@ -12,11 +13,16 @@ function Dashboard({ onSignOut }) {
   const toaster = useToaster();
 
   const onSave = async newData => {
-    const userNicknameRef = database
-      .ref(`/profiles/${profile.uid}`)
-      .child('name');
     try {
-      await userNicknameRef.set(newData);
+      const updates = await getUserUpdates(
+        profile.uid,
+        'name',
+        newData,
+        database
+      );
+
+      await database.ref().update(updates);
+
       const message = (
         <Message showIcon type="success">
           Nickname has been updated
