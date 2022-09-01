@@ -11,7 +11,7 @@ import {
 import CreativeIcon from '@rsuite/icons/Creative';
 import firebase from 'firebase/app';
 import { useModalState } from '../misc/custom-hooks';
-import { database } from '../misc/firebase';
+import { auth, database } from '../misc/firebase';
 
 const Textarea = React.forwardRef((props, ref) => (
   <Input {...props} as="textarea" ref={ref} />
@@ -48,6 +48,9 @@ function CreateRoomBtnModal() {
     const newRoomData = {
       ...formValue,
       createdAt: firebase.database.ServerValue.TIMESTAMP,
+      admins: {
+        [auth.currentUser.uid]: true,
+      },
     };
     try {
       await database.ref('rooms').push(newRoomData);
