@@ -3,7 +3,8 @@ import DashboardIcon from '@rsuite/icons/Dashboard';
 import { Button, Drawer, useToaster, Message } from 'rsuite';
 import { useMediaQuery, useModalState } from '../../misc/custom-hooks';
 import Dashboard from '.';
-import { auth } from '../../misc/firebase';
+import { auth, database } from '../../misc/firebase';
+import { isOfflineForDatabase } from '../../context/profile.context';
 
 function DashboardToggle() {
   const { isOpen, open, close } = useModalState();
@@ -12,16 +13,29 @@ function DashboardToggle() {
   const toaster = useToaster();
 
   const onSignOut = useCallback(() => {
-    auth.signOut();
+    database
+      .ref(`/status/${auth.currentUser.uid}`)
+      .set(isOfflineForDatabase)
+      .then(() => {
+        auth.signOut();
 
-    const message = (
-      <Message showIcon type="info">
-        Signed Out
-      </Message>
-    );
-    toaster.push(message);
+        const message = (
+          <Message showIcon type="info">
+            Signed Out
+          </Message>
+        );
+        toaster.push(message);
 
-    close();
+        close();
+      })
+      .catch(err => {
+        const message = (
+          <Message showIcon type="error">
+            {err.message}
+          </Message>
+        );
+        toaster.push(message);
+      });
   }, [close, toaster]);
 
   return (
