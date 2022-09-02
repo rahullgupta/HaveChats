@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Message, useToaster } from 'rsuite';
 import { useParams } from 'react-router';
-import { database } from '../../../misc/firebase';
+import { auth, database, storage } from '../../../misc/firebase';
 import { transformToArrWithId } from '../../../misc/helpers';
 import MessageItem from './MessageItem';
 
@@ -55,12 +55,105 @@ function Messages() {
     [chatId, toaster]
   );
 
+  const handleLike = useCallback(
+    async msgId => {
+      const { uid } = auth.currentUser;
+      const messageRef = database.ref(`/messages/${msgId}`);
+      let alertMsg;
+      await messageRef.transaction(msg => {
+        if (msg) {
+          if (msg.likes && msg.likes[uid]) {
+            msg.likeCount -= 1;
+            msg.likes[uid] = null;
+            alertMsg = 'Like removed';
+          } else {
+            msg.likeCount += 1;
+            if (!msg.likes) msg.likes = {};
+            msg.likes[uid] = true;
+            alertMsg = 'Like added';
+          }
+        }
+        return msg;
+      });
+      const message = (
+        <Message showIcon type="info">
+          {alertMsg}
+        </Message>
+      );
+      toaster.push(message);
+    },
+    [toaster]
+  );
+
+  const handleDelete = useCallback(
+    async (msgId, file) => {
+      // eslint-disable-next-line no-alert
+      if (!window.confirm('Delete this message?')) return;
+
+      const isLast = messages[messages.length - 1].id === msgId;
+
+      const updates = {};
+
+      updates[`/messages/${msgId}`] = null;
+
+      if (isLast && messages.length > 1) {
+        updates[`/rooms/${chatId}/lastMessage`] = {
+          ...messages[messages.length - 2],
+          msgId: messages[messages.length - 2].id,
+        };
+      }
+
+      if (isLast && messages.length === 1) {
+        updates[`/rooms/${chatId}/lastMessage`] = null;
+      }
+
+      try {
+        await database.ref().update(updates);
+        const message = (
+          <Message showIcon type="info">
+            Message has been deleted
+          </Message>
+        );
+        toaster.push(message);
+      } catch (err) {
+        const message = (
+          <Message showIcon type="error">
+            {err.message}
+          </Message>
+        );
+        // eslint-disable-next-line consistent-return
+        return toaster.push(message);
+      }
+
+      if (file) {
+        try {
+          const fileRef = storage.refFromURL(file.url);
+          await fileRef.delete();
+        } catch (err) {
+          const message = (
+            <Message showIcon type="error">
+              {err.message}
+            </Message>
+          );
+          toaster.push(message);
+        }
+      }
+    },
+    [chatId, messages, toaster]
+  );
+
   return (
     <ul className="msg-list custom-scroll">
       {isChatEmpty && <li>No messages yet</li>}
       {canShowMessages &&
         messages.map(msg => (
-          <MessageItem key={msg.id} message={msg} handleAdmin={handleAdmin} />
+          <MessageItem
+            key={msg.id}
+            message={msg}
+            handleAdmin={handleAdmin}
+            handleLike={handleLike}
+            handleDelete={handleDelete}
+          />
         ))}
     </ul>
   );
