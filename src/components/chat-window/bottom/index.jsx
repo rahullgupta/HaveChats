@@ -77,7 +77,7 @@ function Bottom() {
     async files => {
       setIsLoading(true);
       const updates = {};
-      files.forEach(file => {
+      [...files].forEach(file => {
         const msgData = assembleMessage(profile, chatId);
         msgData.file = file;
 

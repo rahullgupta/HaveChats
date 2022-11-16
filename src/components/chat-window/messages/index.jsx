@@ -222,7 +222,7 @@ function Messages() {
         </li>
       )}
       {isChatEmpty && <li>No messages yet</li>}
-      {canShowMessages && renderMessages}
+      {canShowMessages && renderMessages()}
     </ul>
   );
 }

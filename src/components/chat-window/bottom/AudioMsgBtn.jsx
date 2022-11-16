@@ -45,11 +45,11 @@ function AudioMsgBtn({ afterUpload }) {
             cacheControl: `public, max-age=${3600 * 24 * 3}`,
           });
 
-        const file = {
+        const file = [{
           contentType: snap.metadata.contentType,
           name: snap.metadata.name,
           url: await snap.ref.getDownloadURL(),
-        };
+        }];
         setIsUploading(false);
         afterUpload(file);
       } catch (err) {
