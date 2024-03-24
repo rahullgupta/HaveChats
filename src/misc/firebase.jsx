@@ -1,7 +1,7 @@
 import firebase from 'firebase/app';
 
 const config = {
-  apiKey: 'AIzaSyCxIirDyaVscWDf51nHTt61yqu_c_z5yso',
+  apiKey: `${process.env.REACT_APP_API_KEY}`,
   authDomain: 'chat-web-app-3c4fa.firebaseapp.com',
   projectId: 'chat-web-app-3c4fa',
   storageBucket: 'chat-web-app-3c4fa.appspot.com',
